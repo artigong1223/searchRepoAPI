@@ -4,8 +4,11 @@ const autBox = searchWrapper.querySelector('.autocomplite')
 const users = document.querySelector('.users');
 
 // Удаление репозитория
-users.addEventListener("click", function (e) {
+users.addEventListener("click", function(e) {
     let target = e.target;  
+    if (!target.classList.contains("btn-close")) {
+        return;
+    }
     target.parentElement.remove();
 });
 
