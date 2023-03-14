@@ -28,9 +28,13 @@ function removePredictions() {
 // Селект
 const showRepo = (users) => {
     removePredictions()
-    users.length = 5
-    let usersData = users.join('')
-    autBox.insertAdjacentHTML('afterbegin', usersData)
+    for (let i = 0; i < users.length; i++) {
+        const li = document.createElement('li')
+        autBox.prepend(li)
+        li.setAttribute('data-owner', users[i].owner.login)
+        li.setAttribute('data-stars', users[i].stargazers_count)
+        li.prepend(users[i].name)
+    }
 }
 
 // Добавление репозитория
@@ -38,7 +42,12 @@ function addChosen(target) {
     let name = target.textContent;
     let owner = target.dataset.owner;
     let stars = target.dataset.stars;
-    users.insertAdjacentHTML('afterbegin', `<li>Name: ${name}<br>Owner: ${owner}<br>Stars: ${stars}<button class="btn-close"></button></li>`)
+    const li = document.createElement('li')
+    const button = document.createElement('button')
+    button.classList.add("btn-close")
+    li.prepend(button)
+    li.prepend(`Name: ${name}\nOwner: ${owner}\nStars: ${stars}`)
+    users.prepend(li)
 }
 
 // API Github
@@ -53,8 +62,11 @@ async function handleInput(e) {
         let response = await fetch(`https://api.github.com/search/repositories?q=${userData}`)
         if (response.ok) {
             let repo = await response.json()
-            arr = await repo.items.filter(g => g.name.toLocaleLowerCase().startsWith(userData.toLocaleLowerCase()))
-                                  .map(g => `<li data-owner="${g.owner.login}" data-stars="${g.stargazers_count}">${g.name}</li>`)
+            arr = await repo.items.filter(g => g.name.toLocaleLowerCase().startsWith(userData.toLocaleLowerCase())).filter((a, b) => {
+                if (b < 5) {
+                    return a
+                }
+            })
             showRepo(arr)
         }
     }
@@ -65,17 +77,16 @@ async function handleInput(e) {
 
 
 // Обертка
-function debounce(f, ms) {
-    let isCooldown = false;
+const debounce = (fn, debounceTime) => {
+    let isCooldown
     return function() {
-      if (isCooldown) return;
-      f.apply(this, arguments);
-      isCooldown = true;
-      setTimeout(() => isCooldown = false, ms);
-    };
-}
+        clearTimeout(isCooldown)
+        isCooldown = setTimeout(() => {
+            fn.apply(this, arguments)
+        }, debounceTime)
+    }
+};
 
 
 const debouncedHandle = debounce(handleInput, 500)
-input.addEventListener('keyup', debouncedHandle)
-
+input.addEventListener('input', debouncedHandle)
