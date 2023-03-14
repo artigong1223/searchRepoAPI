@@ -52,6 +52,7 @@ body {
     width: 500px;
     height: 80px;
     padding: 12px 16px;
+    white-space: pre-wrap;
 }
 .btn-close {
     position: absolute;
