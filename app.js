@@ -59,14 +59,11 @@ async function handleInput(e) {
         return;
     }
     try {
-        let response = await fetch(`https://api.github.com/search/repositories?q=${userData}`)
+        let response = await fetch(`https://api.github.com/search/repositories?q=${userData}in:name&per_page=5`)
+        console.log(response)
         if (response.ok) {
             let repo = await response.json()
-            arr = await repo.items.filter(g => g.name.toLocaleLowerCase().startsWith(userData.toLocaleLowerCase())).filter((a, b) => {
-                if (b < 5) {
-                    return a
-                }
-            })
+            arr = await repo.items
             showRepo(arr)
         }
     }
